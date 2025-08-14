@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { Modal } from '@/components/ui/modal';
 
 export default function EventInfo() {
-  const eventImage = "/images/thumbnail/college.jpg";
+  const eventImage = "/images/thumbnail/banner.jpg";
   const imageExists = true;
   const [isMapOpen, setIsMapOpen] = useState(false);
   const handleOpenMap = (e: React.MouseEvent) => {
@@ -36,7 +36,7 @@ export default function EventInfo() {
               <span className="block font-bold text-blue-900 dark:text-blue-200 mb-1 md:mb-2">Waktu</span>
               <span className="inline-flex items-center gap-2 text-orange-600 dark:text-orange-300 font-semibold text-xs sm:text-sm md:text-base bg-white/80 px-3 py-1 rounded-lg shadow-sm w-full md:w-auto">
                 <svg width="20" height="20" fill="none" viewBox="0 0 20 20"><path d="M6.5 2A2.5 2.5 0 0 0 4 4.5V5h12v-.5A2.5 2.5 0 0 0 13.5 2h-7ZM16 7H4v8.5A2.5 2.5 0 0 0 6.5 18h7a2.5 2.5 0 0 0 2.5-2.5V7Zm-8 3a1 1 0 1 1 2 0 1 1 0 0 1-2 0Zm4 0a1 1 0 1 1 2 0 1 1 0 0 1-2 0Z" fill="#f59e42"/></svg>
-                7 September 2025, 11.00 WIB
+                Sabtu, 6 September 2025 || 16.00 WIB
               </span>
             </div>
             <div className="flex-1">
