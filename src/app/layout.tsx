@@ -1,3 +1,9 @@
+import APP_TITLE from './appTitle';
+
+export const metadata = {
+  title: `Pendaftaran - ${APP_TITLE}`,
+  description: `Formulir pendaftaran peserta ${APP_TITLE}`,
+};
 import { Outfit } from 'next/font/google';
 import './globals.css';
 

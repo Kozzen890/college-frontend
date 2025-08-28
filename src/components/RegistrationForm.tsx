@@ -17,26 +17,13 @@ export default function RegistrationForm() {
     angkatan: '',
     phone: '',
   });
+  const [resetKey, setResetKey] = useState(Date.now());
   const [loading, setLoading] = useState(false);
   const { isOpen, openModal, closeModal } = useModal(false);
   const [modalMessage, setModalMessage] = useState('');
-  const [countdown, setCountdown] = useState(10);
-  const modalTimeout = useRef<NodeJS.Timeout | null>(null);
-  const countdownInterval = useRef<NodeJS.Timeout | null>(null);
-
-  useEffect(() => {
-    if (isOpen) {
-      setCountdown(10);
-      countdownInterval.current = setInterval(() => {
-        setCountdown((prev) => prev - 1);
-      }, 1000);
-    } else {
-      if (countdownInterval.current) clearInterval(countdownInterval.current);
-    }
-    return () => {
-      if (countdownInterval.current) clearInterval(countdownInterval.current);
-    };
-  }, [isOpen]);
+  const [eventInfo, setEventInfo] = useState<{ name?: string; date?: string; location?: string; note?: string } | null>(null);
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const [countdown, setCountdown] = useState(20);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -64,25 +51,17 @@ export default function RegistrationForm() {
       const result = await res.json();
       if (!res.ok) throw new Error(result.message || 'Gagal mendaftar.');
       setModalMessage(result.message || 'Pendaftaran berhasil!');
+      setEventInfo(result.event || null);
       openModal();
       // Dispatch event for admin dashboard/table refresh
       if (typeof window !== 'undefined') {
         window.dispatchEvent(new CustomEvent('participant-added'));
       }
-      if (modalTimeout.current) clearTimeout(modalTimeout.current);
-      modalTimeout.current = setTimeout(() => {
-        closeModal();
-        setForm({ name: '', place: '', birth_date: '', kampus: '', jurusan: '', angkatan: '', phone: '' });
-      }, 10000);
     } catch (err: unknown) {
+      setEventInfo(null);
       if (err instanceof Error) setModalMessage(err.message);
       else setModalMessage('Terjadi kesalahan.');
       openModal();
-      if (modalTimeout.current) clearTimeout(modalTimeout.current);
-      modalTimeout.current = setTimeout(() => {
-        closeModal();
-        setForm({ name: '', place: '', birth_date: '', kampus: '', jurusan: '', angkatan: '', phone: '' });
-      }, 10000);
     } finally {
       setLoading(false);
     }
@@ -92,7 +71,29 @@ export default function RegistrationForm() {
   const handleModalClose = () => {
     closeModal();
     setForm({ name: '', place: '', birth_date: '', kampus: '', jurusan: '', angkatan: '', phone: '' });
+    setResetKey(Date.now());
+    setEventInfo(null);
+    setModalMessage('');
   };
+
+  useEffect(() => {
+    if (isOpen && eventInfo) {
+      setCountdown(20);
+      timerRef.current = setInterval(() => {
+        setCountdown((prev) => {
+          if (prev <= 1) {
+            handleModalClose();
+            return 20;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, eventInfo]);
 
   return (
     <div className="flex-1 p-8 flex flex-col justify-center">
@@ -113,6 +114,7 @@ export default function RegistrationForm() {
           <div className="flex-1">
             <Label htmlFor="birth_date" className="text-lg md:text-xl font-semibold">Tanggal Lahir <span className="text-red-500 ml-1 align-super" title="Wajib diisi">*</span></Label>
             <DatePicker
+              key={resetKey}
               id="birth_date"
               placeholder="YYYY-MM-DD"
               value={form.birth_date}
@@ -145,12 +147,35 @@ export default function RegistrationForm() {
           {loading ? 'Mengirim...' : 'Daftar Sekarang'}
         </button>
         <div className="text-sm md:text-base text-red-500 mt-2">* wajib diisi</div>
-  <Modal isOpen={isOpen} onClose={handleModalClose} className="w-[90vw] max-w-[500px] md:w-1/2">
-          <div className="p-6 text-center">
-            <div className="text-2xl font-bold mb-2">{modalMessage}</div>
-            <div className="text-gray-500 text-sm">Pop up ini akan tertutup otomatis dalam <span className="font-bold text-blue-600">{countdown}</span> detik.</div>
-          </div>
-        </Modal>
+  <Modal isOpen={isOpen} onClose={handleModalClose} className="w-11/12 max-w-xl max-h-[80vh]">
+    <div className="p-6 sm:p-8 flex flex-col items-center justify-center h-full w-full text-center bg-white dark:bg-gray-900 rounded-2xl shadow-lg border border-orange-300">
+      {/* Animasi centang */}
+      <div className="mb-6">
+        <svg width="72" height="72" viewBox="0 0 72 72" fill="none" className="mx-auto animate-bounceIn">
+          <circle cx="36" cy="36" r="36" fill="#4ade80"/>
+          <path d="M22 38L33 49L50 27" stroke="#fff" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+      </div>
+      <div className="text-3xl font-extrabold mb-4 text-green-600 drop-shadow-sm tracking-tight">{modalMessage}</div>
+      {eventInfo && (
+        <>
+          <div className="font-bold text-lg text-gray-900 mb-1">{eventInfo.name}</div>
+          <div className="text-base text-gray-700 mb-1">{eventInfo.date} &bull; {eventInfo.location}</div>
+          {eventInfo.note && <div className="text-sm text-gray-600 mt-2 italic border-t pt-2 w-full">{eventInfo.note}</div>}
+          <div className="text-xs text-gray-400 mt-2">Youth Welcoming College 2025</div>
+        </>
+      )}
+      <div className="flex flex-col gap-2 mt-6 w-full items-center justify-center">
+        <div className="text-xs text-gray-500 mb-2">Modal akan tertutup otomatis dalam <span className="font-bold text-red-600">{countdown}</span> detik.</div>
+        <button
+          className="px-6 py-3 rounded-lg bg-red-600 hover:bg-red-700 text-white font-semibold text-base transition-colors shadow w-full sm:w-auto"
+          onClick={handleModalClose}
+        >
+          Kembali
+        </button>
+      </div>
+    </div>
+  </Modal>
       </Form>
     </div>
   );

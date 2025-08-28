@@ -1,14 +1,26 @@
 "use client";
+import { useEffect } from 'react';
+
+// Set document.title secara manual untuk halaman login admin
+function useAdminLoginTitle() {
+  const pathname = usePathname();
+  useEffect(() => {
+    if (pathname === "/admin") {
+      document.title = `Login Admin - ${APP_TITLE}`;
+    }
+  }, [pathname]);
+}
 import { useSidebar } from "@/context/SidebarContext";
 import AdminSidebar from "@/components/admin/AdminSidebar";
 import Backdrop from "@/layout/Backdrop";
 import AdminHeader from "@/components/admin/AdminHeader";
 import React from "react";
-// import AdminHeader from "@/components/admin/AdminHeader";
+import APP_TITLE from '../appTitle';
 import { usePathname } from "next/navigation";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   useSidebar();
+  useAdminLoginTitle();
   const pathname = usePathname();
 
   // Jika di halaman login admin (/admin), render children saja tanpa sidebar/header

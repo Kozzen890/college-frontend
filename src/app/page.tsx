@@ -1,5 +1,3 @@
-
-
 "use client";
 import React from 'react';
 
@@ -9,6 +7,7 @@ import EventInfo from '@/components/EventInfo';
 import { Toaster } from '@/lib/toast';
 
 export default function Home() {
+  // ...existing code...
   return (
     <>
       <Toaster position="top-right" />
